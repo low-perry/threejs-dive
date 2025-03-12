@@ -13,8 +13,9 @@ const aspect = w / h;
 const near = 0.1;
 const far = 1000;
 const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-camera.position.z = 50;
-
+camera.position.z = 17;
+camera.position.y = 5;
+camera.position.x = 10;
 const scene = new THREE.Scene();
 
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -61,9 +62,9 @@ function checkModelsLoaded() {
   if (modelsLoaded === 3) {
     // Set astronaut's initial position to moon1's position
     astronaut.position.copy(moon1.position);
-    astronaut.position.y -= 5.4;
-    astronaut.position.z += 10;
-    astronaut.position.x += 3;
+    astronaut.position.y -= 2.7;
+    astronaut.position.z += 5;
+    astronaut.position.x += 1.5;
     // Offset to simulate sitting on the surface
     // Start the simulation once all models have been loaded.
     console.log("Moon1 position: ", moon1.position);
@@ -79,7 +80,7 @@ loader.load(
   function (gltf) {
     moon1 = gltf.scene;
     // Adjust scale/rotation if needed (depends on your model)
-    moon1.scale.set(2, 2, 2);
+    moon1.scale.set(1, 1, 1);
     scene.add(moon1);
     modelsLoaded++;
     checkModelsLoaded();
@@ -95,7 +96,7 @@ loader.load(
   "models/moon.glb",
   function (gltf) {
     moon2 = gltf.scene;
-    moon2.scale.set(2, 2, 2);
+    moon2.scale.set(1, 1, 1);
     scene.add(moon2);
     modelsLoaded++;
     checkModelsLoaded();
@@ -111,7 +112,7 @@ loader.load(
   "models/astronaut1.glb",
   function (gltf) {
     astronaut = gltf.scene;
-    astronaut.scale.set(2, 2, 2);
+    astronaut.scale.set(1, 1, 1);
     scene.add(astronaut);
     modelsLoaded++;
     checkModelsLoaded();
@@ -129,7 +130,7 @@ loader.load(
 const m1 = 5; // Mass for moon1
 const m2 = 3; // Mass for moon2
 let theta = 0; // orbital phase (true anomaly)
-const p = 24; // semi‑latus rectum: controls overall orbit size
+const p = 12; // semi‑latus rectum: controls overall orbit size
 const e = 0.5; // eccentricity of the orbit
 
 // astronaut jumping variables.
@@ -137,8 +138,8 @@ let astronautOnMoon1 = true; // Indicates which body the astronaut is attached t
 let isJumping = false;
 let jumpProgress = 0; // Parameter from 0 to 1 representing jump progress.
 let jumpStart, jumpTarget, jumpControl;
-const jumpSpeed = 0.012; // Increased from 0.005 to make jump 3x faster
-const jumpHeight = 25; // Slightly increased height for a more dramatic jump
+const jumpSpeed = 0.015; // Increased from 0.005 to make jump 3x faster
+const jumpHeight = 12.5; // Slightly increased height for a more dramatic jump
 
 // Trigger the jump when Space is pressed.
 document.addEventListener("keydown", (event) => {
@@ -151,48 +152,48 @@ function initiateAstronautJump() {
   if (!moon1 || !moon2 || !astronaut) return;
   isJumping = true;
   jumpProgress = 0;
-  
+
   // Calculate approximate effective jump duration accounting for easing
   const jumpDuration = 0.9 / jumpSpeed;
-  
+
   // Predict the future position of the target moon
-  const futureTheta = theta + (jumpDuration * 0.01);
+  const futureTheta = theta + jumpDuration * 0.01;
   const futureR = p / (1 + e * Math.cos(futureTheta));
   const futureX = futureR * Math.cos(futureTheta);
   const futureZ = futureR * Math.sin(futureTheta);
-  
+
   if (astronautOnMoon1) {
     jumpStart = moon1.position.clone();
     // Calculate future position of moon2
     const futurePos = new THREE.Vector3(
-      -m1 / (m1 + m2) * futureX,
+      (-m1 / (m1 + m2)) * futureX,
       0,
-      -m1 / (m1 + m2) * futureZ
+      (-m1 / (m1 + m2)) * futureZ
     );
-    
+
     // Apply the same offsets used for positioning the astronaut
-    futurePos.y -= 5.4;
-    futurePos.z += 10;
-    futurePos.x += 3;
-    
+    astronaut.position.y -= 2.7;
+    astronaut.position.z += 5;
+    astronaut.position.x += 1.5;
+
     jumpTarget = futurePos;
   } else {
     jumpStart = moon2.position.clone();
     // Calculate future position of moon1
     const futurePos = new THREE.Vector3(
-      m2 / (m1 + m2) * futureX,
+      (m2 / (m1 + m2)) * futureX,
       0,
-      m2 / (m1 + m2) * futureZ
+      (m2 / (m1 + m2)) * futureZ
     );
-    
+
     // Apply the same offsets used for positioning the astronaut
-    futurePos.y -= 5.4;
-    futurePos.z += 10;
-    futurePos.x += 3;
-    
+    futurePos.y -= 2.7;
+    futurePos.z += 5;
+    futurePos.x += 1.5;
+
     jumpTarget = futurePos;
   }
-  
+
   // Define control point by taking the midpoint and adding a vertical offset
   jumpControl = jumpStart.clone().add(jumpTarget).multiplyScalar(0.5);
   jumpControl.y += jumpHeight;
@@ -203,14 +204,14 @@ function initiateAstronautJump() {
 // --------------------------
 let isWiggling = false;
 let wiggleStartTime = 0;
-const wiggleDuration = 0.5; // Duration in seconds
+const wiggleDuration = 1; // Duration in seconds
 const wiggleFrequency = 20; // Higher = faster oscillation
-const wiggleAmplitude = 0.3; // Higher = more intense wiggle
+const wiggleAmplitude = 0.5; // Higher = more intense wiggle
 
 // Modify the animate function to include the wiggle effect
 function animate() {
   requestAnimationFrame(animate);
-  
+
   const currentTime = performance.now() / 1000; // Current time in seconds
 
   // Update the orbital positions.
@@ -222,19 +223,24 @@ function animate() {
 
   // Calculate base positions (without wiggle)
   const moon1BasePosition = new THREE.Vector3(r1_factor * x, 0, r1_factor * z);
-  const moon2BasePosition = new THREE.Vector3(-r2_factor * x, 0, -r2_factor * z);
+  const moon2BasePosition = new THREE.Vector3(
+    -r2_factor * x,
+    0,
+    -r2_factor * z
+  );
 
   // Apply wiggle effect if active
   if (isWiggling) {
     const elapsedWiggleTime = currentTime - wiggleStartTime;
-    
+
     if (elapsedWiggleTime < wiggleDuration) {
       // Calculate wiggle offset using damped sine wave
-      const dampingFactor = 1 - (elapsedWiggleTime / wiggleDuration); // Decrease over time
-      const wiggleOffset = Math.sin(elapsedWiggleTime * wiggleFrequency) 
-                         * wiggleAmplitude 
-                         * dampingFactor;
-      
+      const dampingFactor = 1 - elapsedWiggleTime / wiggleDuration; // Decrease over time
+      const wiggleOffset =
+        Math.sin(elapsedWiggleTime * wiggleFrequency) *
+        wiggleAmplitude *
+        dampingFactor;
+
       // Apply wiggle to the landing moon
       if (astronautOnMoon1) {
         moon1BasePosition.y += wiggleOffset;
@@ -245,7 +251,7 @@ function animate() {
       isWiggling = false; // Turn off wiggling after duration elapsed
     }
   }
-  
+
   // Set moon positions (now potentially including wiggle)
   if (moon1) moon1.position.copy(moon1BasePosition);
   if (moon2) moon2.position.copy(moon2BasePosition);
@@ -256,12 +262,12 @@ function animate() {
   if (isJumping) {
     jumpProgress += jumpSpeed;
     let t = jumpProgress;
-    
+
     if (jumpProgress >= 1) {
       jumpProgress = 1;
       isJumping = false;
       astronautOnMoon1 = !astronautOnMoon1; // Toggle the attachment on landing.
-      
+
       // Trigger wiggle effect on landing
       isWiggling = true;
       wiggleStartTime = currentTime;
@@ -274,26 +280,28 @@ function animate() {
       .add(jumpControl.clone().multiplyScalar(2 * oneMinusT * t))
       .add(jumpTarget.clone().multiplyScalar(t * t));
     astronaut.position.copy(jumpPos);
+
+    //rotate
   } else {
     // While not jumping, the astronaut stays "attached" to its host body.
     if (astronaut) {
       if (astronautOnMoon1 && moon1) {
         astronaut.position.copy(moon1.position);
-        astronaut.position.y -= 5.4;
-        astronaut.position.z += 10;
-        astronaut.position.x += 3;
+        astronaut.position.y -= 2.7;
+        astronaut.position.z += 5;
+        astronaut.position.x += 1.5;
       } else if (moon2) {
         astronaut.position.copy(moon2.position);
-        astronaut.position.y -= 5.4;
-        astronaut.position.z += 10;
-        astronaut.position.x += 3;
+        astronaut.position.y -= 2.7;
+        astronaut.position.z += 5;
+        astronaut.position.x += 1.5;
       }
     }
   }
 
   renderer.render(scene, camera);
 }
- 
+
 // --------------------------
 // 5. Handle Window Resize
 // --------------------------

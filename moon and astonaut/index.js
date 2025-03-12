@@ -137,8 +137,8 @@ let astronautOnMoon1 = true; // Indicates which body the astronaut is attached t
 let isJumping = false;
 let jumpProgress = 0; // Parameter from 0 to 1 representing jump progress.
 let jumpStart, jumpTarget, jumpControl;
-const jumpSpeed = 0.005; // Increment per frame (adjust to change jump duration)
-const jumpHeight = 20; // Vertical offset at the jump's apex
+const jumpSpeed = 0.012; // Increased from 0.005 to make jump 3x faster
+const jumpHeight = 25; // Slightly increased height for a more dramatic jump
 
 // Trigger the jump when Space is pressed.
 document.addEventListener("keydown", (event) => {
@@ -147,19 +147,53 @@ document.addEventListener("keydown", (event) => {
   }
 });
 
-// Setup the astronaut jump by recording the current positions.
 function initiateAstronautJump() {
   if (!moon1 || !moon2 || !astronaut) return;
   isJumping = true;
   jumpProgress = 0;
+  
+  // Calculate approximate effective jump duration accounting for easing
+  const jumpDuration = 0.9 / jumpSpeed;
+  
+  // Predict the future position of the target moon
+  const futureTheta = theta + (jumpDuration * 0.01);
+  const futureR = p / (1 + e * Math.cos(futureTheta));
+  const futureX = futureR * Math.cos(futureTheta);
+  const futureZ = futureR * Math.sin(futureTheta);
+  
   if (astronautOnMoon1) {
     jumpStart = moon1.position.clone();
-    jumpTarget = moon2.position.clone();
+    // Calculate future position of moon2
+    const futurePos = new THREE.Vector3(
+      -m1 / (m1 + m2) * futureX,
+      0,
+      -m1 / (m1 + m2) * futureZ
+    );
+    
+    // Apply the same offsets used for positioning the astronaut
+    futurePos.y -= 5.4;
+    futurePos.z += 10;
+    futurePos.x += 3;
+    
+    jumpTarget = futurePos;
   } else {
     jumpStart = moon2.position.clone();
-    jumpTarget = moon1.position.clone();
+    // Calculate future position of moon1
+    const futurePos = new THREE.Vector3(
+      m2 / (m1 + m2) * futureX,
+      0,
+      m2 / (m1 + m2) * futureZ
+    );
+    
+    // Apply the same offsets used for positioning the astronaut
+    futurePos.y -= 5.4;
+    futurePos.z += 10;
+    futurePos.x += 3;
+    
+    jumpTarget = futurePos;
   }
-  // Define control point by taking the midpoint and adding a vertical offset.
+  
+  // Define control point by taking the midpoint and adding a vertical offset
   jumpControl = jumpStart.clone().add(jumpTarget).multiplyScalar(0.5);
   jumpControl.y += jumpHeight;
 }
@@ -208,7 +242,7 @@ function animate() {
         astronaut.position.z += 10;
         astronaut.position.x += 3;
       } else if (moon2) {
-        astronaut.position.copy(moon2.position); 
+        astronaut.position.copy(moon2.position);
         astronaut.position.y -= 5.4;
         astronaut.position.z += 10;
         astronaut.position.x += 3;
@@ -218,7 +252,7 @@ function animate() {
 
   renderer.render(scene, camera);
 }
-
+ 
 // --------------------------
 // 5. Handle Window Resize
 // --------------------------

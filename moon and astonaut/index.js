@@ -201,8 +201,17 @@ function initiateAstronautJump() {
 // --------------------------
 // 4. Animation Loop
 // --------------------------
+let isWiggling = false;
+let wiggleStartTime = 0;
+const wiggleDuration = 0.5; // Duration in seconds
+const wiggleFrequency = 20; // Higher = faster oscillation
+const wiggleAmplitude = 0.3; // Higher = more intense wiggle
+
+// Modify the animate function to include the wiggle effect
 function animate() {
   requestAnimationFrame(animate);
+  
+  const currentTime = performance.now() / 1000; // Current time in seconds
 
   // Update the orbital positions.
   const r = p / (1 + e * Math.cos(theta));
@@ -211,19 +220,51 @@ function animate() {
   const r1_factor = m2 / (m1 + m2);
   const r2_factor = m1 / (m1 + m2);
 
-  if (moon1) moon1.position.set(r1_factor * x, 0, r1_factor * z);
-  if (moon2) moon2.position.set(-r2_factor * x, 0, -r2_factor * z);
+  // Calculate base positions (without wiggle)
+  const moon1BasePosition = new THREE.Vector3(r1_factor * x, 0, r1_factor * z);
+  const moon2BasePosition = new THREE.Vector3(-r2_factor * x, 0, -r2_factor * z);
+
+  // Apply wiggle effect if active
+  if (isWiggling) {
+    const elapsedWiggleTime = currentTime - wiggleStartTime;
+    
+    if (elapsedWiggleTime < wiggleDuration) {
+      // Calculate wiggle offset using damped sine wave
+      const dampingFactor = 1 - (elapsedWiggleTime / wiggleDuration); // Decrease over time
+      const wiggleOffset = Math.sin(elapsedWiggleTime * wiggleFrequency) 
+                         * wiggleAmplitude 
+                         * dampingFactor;
+      
+      // Apply wiggle to the landing moon
+      if (astronautOnMoon1) {
+        moon1BasePosition.y += wiggleOffset;
+      } else {
+        moon2BasePosition.y += wiggleOffset;
+      }
+    } else {
+      isWiggling = false; // Turn off wiggling after duration elapsed
+    }
+  }
+  
+  // Set moon positions (now potentially including wiggle)
+  if (moon1) moon1.position.copy(moon1BasePosition);
+  if (moon2) moon2.position.copy(moon2BasePosition);
 
   theta += 0.01;
 
-  // Update the astronaut's position.
+  // Update the astronaut's position with easing.
   if (isJumping) {
     jumpProgress += jumpSpeed;
     let t = jumpProgress;
-    if (t >= 1) {
-      t = 1;
+    
+    if (jumpProgress >= 1) {
+      jumpProgress = 1;
       isJumping = false;
       astronautOnMoon1 = !astronautOnMoon1; // Toggle the attachment on landing.
+      
+      // Trigger wiggle effect on landing
+      isWiggling = true;
+      wiggleStartTime = currentTime;
     }
     // Quadratic Bezier interpolation:
     // pos(t) = (1-t)²*jumpStart + 2(1-t)*t*jumpControl + t²*jumpTarget

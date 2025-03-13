@@ -69,9 +69,25 @@ scene.add(mesh2); */
 
 const loader = new GLTFLoader();
 
-let  astronaut, astropurple;
+let  astronaut, astropurple, moon1;
 let modelsLoaded = 0;
 
+loader.load(
+  "../assets/moon.glb",
+  function (gltf) {
+    moon1 = gltf.scene;
+    // Adjust scale/rotation if needed (depends on your model)
+
+    scene.add(moon1);
+    console.log(moon1.position);
+    modelsLoaded++;
+    //checkModelsLoaded();
+  },
+  undefined,
+  function (error) {
+    console.error("Error loading moon.glb:", error);
+  }
+);
 
 
 //load astronaut glTF model
@@ -83,6 +99,7 @@ loader.load(
     astronaut.position.z += 5;
     astronaut.position.x += 1.5; */
     scene.add(astronaut);
+    console.log(astronaut);
     modelsLoaded++;
     //checkModelsLoaded();
   },
@@ -99,7 +116,12 @@ loader.load(
     /* astronaut.position.y -= 2.7;
     astronaut.position.z += 5;
     astronaut.position.x += 1.5; */
+   /*  astropurple.position.y += 4;
+    astropurple.position.z -= 2
+    astropurple.position.x -= 2; */
+    astropurple.position.copy(moon1.position);
     scene.add(astropurple);
+    console.log(astropurple.position);
     modelsLoaded++;
     //checkModelsLoaded();
   },
@@ -109,10 +131,10 @@ loader.load(
   }
 );
 
+
 function animate() {
   requestAnimationFrame(animate);
   astronaut.rotation.y -= 0.01;
-  astropurple.rotation.y -= 0.01;
   /* mesh.rotation.y += 0.01;
   mesh2.rotation.y -= 0.01; */
   renderer.render(scene, camera);

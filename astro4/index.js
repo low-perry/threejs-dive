@@ -164,21 +164,21 @@ function initiateAstronautJump() {
   const futureZ = futureR * Math.sin(futureTheta);
 
   if (astronautOnMoon1) {
-    jumpStart = moon1.position.clone();
+    jumpStart = astronaut.position.clone();
     // Calculate future position of moon2
     const futurePos = new THREE.Vector3(
       (-m1 / (m1 + m2)) * futureX,
       0,
       (-m1 / (m1 + m2)) * futureZ
     );
-    astronaut.position.y += 3.7;
-    astronaut.position.z += 1;
-    astronaut.position.x += 1;
+    futurePos.y += 3.7;
+    futurePos.z += 1;
+    futurePos.x += 1;
 
 
     jumpTarget = futurePos;
   } else {
-    jumpStart = moon2.position.clone();
+    jumpStart = astronaut.position.clone();
     // Calculate future position of moon1
     const futurePos = new THREE.Vector3(
       (m2 / (m1 + m2)) * futureX,

@@ -2,11 +2,15 @@ import * as THREE from "three";
 import { GLTFLoader } from "jsm/loaders/GLTFLoader.js";
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
 
-const w = window.innerWidth;
-const h = window.innerHeight;
+const container = document.getElementById('canvas-container');
+
+// Get dimensions from the container instead of window
+const w = container.clientWidth;
+const h = container.clientHeight;
+
 const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(w, h);
-document.body.appendChild(renderer.domElement);
+container.appendChild(renderer.domElement);
 
 const fov = 75;
 const aspect = w / h;
@@ -48,7 +52,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
 directionalLight.position.set(0, 1, 0);
 scene.add(directionalLight);
 
-const cubeTextureLoader = new THREE.CubeTextureLoader();
+//const cubeTextureLoader = new THREE.CubeTextureLoader();
 
 /* // Load the 6 sides of the skybox (you need 6 separate images)
 const skyboxTexture = cubeTextureLoader.load([
@@ -385,7 +389,11 @@ function animate() {
 // --------------------------
 window.addEventListener("resize", onWindowResize, false);
 function onWindowResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  // Only update if container size has changed
+  const newWidth = container.clientWidth;
+  const newHeight = container.clientHeight;
+  
+  camera.aspect = newWidth / newHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(newWidth, newHeight);
 }

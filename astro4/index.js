@@ -142,6 +142,13 @@ let jumpStart, jumpTarget, jumpControl;
 const jumpSpeed = 0.01; // Increased from 0.005 to make jump 3x faster
 const jumpHeight = 12.5; // Slightly increased height for a more dramatic jump
 
+// Add these variables near other state variables
+let isRotating = false;
+let rotationProgress = 0;
+const rotationSpeed = 0.017; // Adjust for faster/slower rotation
+let rotationStartQuaternion = new THREE.Quaternion();
+let rotationEndQuaternion = new THREE.Quaternion();
+
 // Trigger the jump when Space is pressed.
 document.addEventListener("keydown", (event) => {
   if (event.code === "Space" && !isJumping) {
@@ -174,7 +181,6 @@ function initiateAstronautJump() {
     futurePos.y += 3.7;
     futurePos.z += 1;
     futurePos.x += 1;
-
 
     jumpTarget = futurePos;
   } else {
@@ -266,10 +272,28 @@ function animate() {
       isJumping = false;
       astronautOnMoon1 = !astronautOnMoon1; // Toggle the attachment on landing.
 
+      // Start rotation after landing
+      isRotating = true;
+      rotationProgress = 0;
+
+      // Store current rotation as starting point
+      rotationStartQuaternion.copy(astronaut.quaternion);
+
+      // Create a temporary object to get target rotation
+      const targetDirection = astronautOnMoon1
+        ? moon2.position.clone()
+        : moon1.position.clone();
+      const tempObject = new THREE.Object3D();
+      tempObject.position.copy(astronaut.position);
+      tempObject.lookAt(targetDirection);
+      tempObject.rotateX(-Math.PI / 8); // Apply the same tilt
+      rotationEndQuaternion.copy(tempObject.quaternion);
+
       // Trigger wiggle effect on landing
       isWiggling = true;
       wiggleStartTime = currentTime;
     }
+
     // Quadratic Bezier interpolation:
     // pos(t) = (1-t)²*jumpStart + 2(1-t)*t*jumpControl + t²*jumpTarget
     const oneMinusT = 1 - t;
@@ -278,6 +302,9 @@ function animate() {
       .add(jumpControl.clone().multiplyScalar(2 * oneMinusT * t))
       .add(jumpTarget.clone().multiplyScalar(t * t));
     astronaut.position.copy(jumpPos);
+
+    astronaut.lookAt(jumpTarget);
+    astronaut.rotateX(-Math.PI / 12);
 
     //rotate
   } else {
@@ -288,11 +315,39 @@ function animate() {
         astronaut.position.y += 3.7;
         astronaut.position.z += 1;
         astronaut.position.x += 1;
+
+        // Only do immediate lookAt if not in transition
+        if (!isRotating) {
+          astronaut.lookAt(moon2.position);
+          astronaut.rotateX(-Math.PI / 8);
+        }
       } else if (moon2) {
         astronaut.position.copy(moon2.position);
         astronaut.position.y += 3.7;
         astronaut.position.z += 1;
         astronaut.position.x += 1;
+
+        // Only do immediate lookAt if not in transition
+        if (!isRotating) {
+          astronaut.lookAt(moon1.position);
+          astronaut.rotateX(-Math.PI / 8);
+        }
+      }
+
+      // Handle rotation transition
+      if (isRotating) {
+        rotationProgress += rotationSpeed;
+        if (rotationProgress >= 1) {
+          rotationProgress = 1;
+          isRotating = false;
+        }
+
+        // Use quaternion slerp for smooth rotation
+        astronaut.quaternion.slerpQuaternions(
+          rotationStartQuaternion,
+          rotationEndQuaternion,
+          rotationProgress
+        );
       }
     }
   }

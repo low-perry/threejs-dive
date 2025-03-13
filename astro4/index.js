@@ -110,7 +110,7 @@ loader.load(
 
 // Load astronaut glTF model
 loader.load(
-  "../assets/astropurple.glb",
+  "../assets/astropink.glb",
   function (gltf) {
     astronaut = gltf.scene;
     astronaut.scale.set(1, 1, 1);

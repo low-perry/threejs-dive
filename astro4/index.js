@@ -48,6 +48,30 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
 directionalLight.position.set(0, 1, 0);
 scene.add(directionalLight);
 
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+
+/* // Load the 6 sides of the skybox (you need 6 separate images)
+const skyboxTexture = cubeTextureLoader.load([
+  '../assets/clouds.png',  // positive x
+  '../assets/clouds.png',   // negative x
+  '../assets/clouds.png',    // positive y
+  '../assets/clouds.png', // negative y
+  '../assets/clouds.png',  // positive z
+  '../assets/clouds.png'    // negative z
+]);
+
+// Set the scene background to the skybox
+scene.background = skyboxTexture; */
+
+// Create a TextureLoader
+const textureLoader = new THREE.TextureLoader();
+
+// Load the background image
+const backgroundTexture = textureLoader.load('../assets/cotton_candy_pink_pastel_clouds.png');
+
+// Set the background of your scene to the loaded texture
+scene.background = backgroundTexture
+
 // --------------------------
 // 2. Load GLTF Models
 // --------------------------
@@ -353,6 +377,7 @@ function animate() {
   }
 
   renderer.render(scene, camera);
+  controls.update();
 }
 
 // --------------------------

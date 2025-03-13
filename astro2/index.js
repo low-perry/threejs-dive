@@ -48,7 +48,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1.5);
 directionalLight.position.set(0, 1, 0);
 scene.add(directionalLight);
 
-const geo = new THREE.BoxGeometry(1, 1, 1);
+/* const geo = new THREE.BoxGeometry(1, 1, 1);
 const mat = new THREE.MeshStandardMaterial({
   color: 0xffffff,
   flatShading: true
@@ -60,16 +60,16 @@ const geo2 = new THREE.BoxGeometry(1, 1, 1);
 const mat2 = new THREE.MeshStandardMaterial({
   color: 0xffffff,
   flatShading: true
-});
-const mesh2 = new THREE.Mesh(geo2, mat2);
+}); */
+/* const mesh2 = new THREE.Mesh(geo2, mat2);
 mesh2.position.x = 2;
 mesh2.position.y = 2;
 mesh2.position.z = 2;
-scene.add(mesh2);
+scene.add(mesh2); */
 
 const loader = new GLTFLoader();
 
-let  astronaut;
+let  astronaut, astropurple;
 let modelsLoaded = 0;
 
 
@@ -92,11 +92,29 @@ loader.load(
   }
 );
 
+loader.load(
+  "../assets/astropurple.glb",
+  function (gltf) {
+    astropurple = gltf.scene;
+    /* astronaut.position.y -= 2.7;
+    astronaut.position.z += 5;
+    astronaut.position.x += 1.5; */
+    scene.add(astropurple);
+    modelsLoaded++;
+    //checkModelsLoaded();
+  },
+  undefined,
+  function (error) {
+    console.error("Error loading astronaut.glb:", error);
+  }
+);
+
 function animate() {
   requestAnimationFrame(animate);
   astronaut.rotation.y -= 0.01;
-  mesh.rotation.y += 0.01;
-  mesh2.rotation.y -= 0.01;
+  astropurple.rotation.y -= 0.01;
+  /* mesh.rotation.y += 0.01;
+  mesh2.rotation.y -= 0.01; */
   renderer.render(scene, camera);
   controls.update();
 }

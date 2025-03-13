@@ -63,7 +63,10 @@ function checkModelsLoaded() {
     // Set astronaut's initial position to moon1's position
     astronaut.position.copy(moon1.position);
     // Offset to simulate sitting on the surface
-    astronaut.position.y += 2;
+    astronaut.position.y += 3.7;
+    astronaut.position.z += 1;
+    astronaut.position.x += 1;
+
     // Start the simulation once all models have been loaded.
     console.log("Moon1 position: ", moon1.position);
     console.log("Moon2 position: ", moon2.position);
@@ -136,7 +139,7 @@ let astronautOnMoon1 = true; // Indicates which body the astronaut is attached t
 let isJumping = false;
 let jumpProgress = 0; // Parameter from 0 to 1 representing jump progress.
 let jumpStart, jumpTarget, jumpControl;
-const jumpSpeed = 0.015; // Increased from 0.005 to make jump 3x faster
+const jumpSpeed = 0.01; // Increased from 0.005 to make jump 3x faster
 const jumpHeight = 12.5; // Slightly increased height for a more dramatic jump
 
 // Trigger the jump when Space is pressed.
@@ -168,6 +171,9 @@ function initiateAstronautJump() {
       0,
       (-m1 / (m1 + m2)) * futureZ
     );
+    astronaut.position.y += 3.7;
+    astronaut.position.z += 1;
+    astronaut.position.x += 1;
 
 
     jumpTarget = futurePos;
@@ -179,6 +185,9 @@ function initiateAstronautJump() {
       0,
       (m2 / (m1 + m2)) * futureZ
     );
+    futurePos.y += 3.7;
+    futurePos.z += 1;
+    futurePos.x += 1;
 
     jumpTarget = futurePos;
   }
@@ -277,12 +286,13 @@ function animate() {
       if (astronautOnMoon1 && moon1) {
         astronaut.position.copy(moon1.position);
         astronaut.position.y += 3.7;
-        astronaut.position.z -= 1;
-        astronaut.position.x -= 3;
-        
+        astronaut.position.z += 1;
+        astronaut.position.x += 1;
       } else if (moon2) {
         astronaut.position.copy(moon2.position);
-        astronaut.position.y += 3;
+        astronaut.position.y += 3.7;
+        astronaut.position.z += 1;
+        astronaut.position.x += 1;
       }
     }
   }

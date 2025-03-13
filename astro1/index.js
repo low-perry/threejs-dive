@@ -93,9 +93,11 @@ loader.load(
 function animate() {
   requestAnimationFrame(animate);
   astronaut.rotation.y -= 0.01;
+  console.log(astronaut.position);
   moon1.rotation.y += 0.01;
   moon1.rotation.x += 0.01;
   moon1.rotation.z += 0.01;
+  console.log(moon1.position);
   renderer.render(scene, camera);
   controls.update();
 }
